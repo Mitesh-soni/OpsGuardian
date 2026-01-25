@@ -4,13 +4,13 @@ pipeline {
     parameters {
         string(
             name: 'SERVICES',
-            defaultValue: '',
-            description: 'Comma-separated services (user-service,alert-service,ui)'
+            description: 'Comma-separated services to deploy (example: user-service,notification-service,opsguardian-ui)'
         )
     }
 
     environment {
-        TAG = "${env.BUILD_NUMBER}"
+        API_DIR = 'OpsGuardianAPI'
+        UI_DIR  = 'OpsGuardianUI'
     }
 
     stages {
@@ -21,67 +21,50 @@ pipeline {
             }
         }
 
-        stage('Parse Services') {
+        stage('Deploy Services') {
             steps {
                 script {
                     if (!params.SERVICES?.trim()) {
-                        error "SERVICES parameter is empty"
+                        error "SERVICES parameter is required"
                     }
-                    SERVICES = params.SERVICES.split(',').collect { it.trim() }
-                    echo "Selected services: ${SERVICES}"
+
+                    def services = params.SERVICES
+                        .split(',')
+                        .collect { it.trim() }
+
+                    for (service in services) {
+                        if (service == 'opsguardian-ui') {
+                            deployUI()
+                        } else {
+                            deployAPI(service)
+                        }
+                    }
                 }
-            }
-        }
-
-        stage('User Service') {
-            when { expression { SERVICES.contains('user-service') } }
-            steps {
-                sh '''
-                  docker build -t opsguardian-user:${TAG} OpsGuardianAPI/user-service
-                  kubectl apply -f ~/k8s/deployments/user-service-deployment.yaml
-                '''
-            }
-        }
-
-        stage('Alert Service') {
-            when { expression { SERVICES.contains('alert-service') } }
-            steps {
-                sh '''
-                  docker build -t opsguardian-alert:${TAG} OpsGuardianAPI/alert-service
-                  kubectl apply -f ~/k8s/deployments/alert-service-deployment.yaml
-                '''
-            }
-        }
-
-        stage('Analytics Service') {
-            when { expression { SERVICES.contains('analytics-service') } }
-            steps {
-                sh '''
-                  docker build -t opsguardian-analytics:${TAG} OpsGuardianAPI/analytics-service
-                  kubectl apply -f ~/k8s/deployments/analytics-service-deployment.yaml
-                '''
-            }
-        }
-
-        stage('API Gateway') {
-            when { expression { SERVICES.contains('api-gateway') } }
-            steps {
-                sh '''
-                  docker build -t opsguardian-gateway:${TAG} OpsGuardianAPI/api-gateway
-                  kubectl apply -f ~/k8s/deployments/api-gateway-deployment.yaml
-                '''
-            }
-        }
-
-        stage('UI') {
-            when { expression { SERVICES.contains('ui') } }
-            steps {
-                sh '''
-                  docker build -t opsguardian-ui:${TAG} OpsGuardianUI
-                  kubectl apply -f ~/k8s/deployments/opsguardian-ui-deployment.yaml
-                '''
             }
         }
     }
 }
 
+/* ---------------- FUNCTIONS ---------------- */
+
+def deployAPI(service) {
+    echo "Deploying API service: ${service}"
+
+    dir("OpsGuardianAPI/${service}") {
+        sh """
+        docker build -t opsguardian/${service}:latest .
+        docker compose up -d ${service} || true
+        """
+    }
+}
+
+def deployUI() {
+    echo "Deploying UI"
+
+    dir("OpsGuardianUI") {
+        sh """
+        docker build -t opsguardian/ui:latest .
+        docker compose up -d ui || true
+        """
+    }
+}
