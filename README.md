@@ -314,8 +314,20 @@ PORT=12401
 DB_HOST=100.113.63.36
 DB_PORT=5432
 DB_USERNAME=admin
-DB_PASSWORD=admin@#55#
+DB_PASSWORD="admin@#55#"        # ⚠️ MUST be quoted!
 DB_DATABASE=userdb
+
+# Redis Configuration
+REDIS_HOST=100.113.63.36
+REDIS_PORT=6379
+REDIS_PASSWORD="redis@#55#6379#"  # ⚠️ MUST be quoted!
+
+# Kafka Configuration
+KAFKA_ENABLED=true
+KAFKA_BROKERS=100.113.63.36:9092
+KAFKA_CLIENT_ID=user-service
+KAFKA_GROUP_ID=user-service-group
+KAFKAJS_NO_PARTITIONER_WARNING=1
 
 # JWT Configuration
 JWT_SECRET=your-secret-key-change-in-production
@@ -334,8 +346,20 @@ PORT=12402
 DB_HOST=100.113.63.36
 DB_PORT=5432
 DB_USERNAME=admin
-DB_PASSWORD=admin@#55#
+DB_PASSWORD="admin@#55#"        # ⚠️ MUST be quoted!
 DB_DATABASE=alertdb
+
+# Redis Configuration
+REDIS_HOST=100.113.63.36
+REDIS_PORT=6379
+REDIS_PASSWORD="redis@#55#6379#"  # ⚠️ MUST be quoted!
+
+# Kafka Configuration
+KAFKA_ENABLED=true
+KAFKA_BROKERS=100.113.63.36:9092
+KAFKA_CLIENT_ID=alert-service
+KAFKA_GROUP_ID=alert-service-group
+KAFKAJS_NO_PARTITIONER_WARNING=1
 
 # Service URLs
 NOTIFICATION_SERVICE_URL=http://localhost:12404
@@ -355,8 +379,20 @@ PORT=12403
 DB_HOST=100.113.63.36
 DB_PORT=5432
 DB_USERNAME=admin
-DB_PASSWORD=admin@#55#
+DB_PASSWORD="admin@#55#"        # ⚠️ MUST be quoted!
 DB_DATABASE=incidentdb
+
+# Redis Configuration
+REDIS_HOST=100.113.63.36
+REDIS_PORT=6379
+REDIS_PASSWORD="redis@#55#6379#"  # ⚠️ MUST be quoted!
+
+# Kafka Configuration
+KAFKA_ENABLED=true
+KAFKA_BROKERS=100.113.63.36:9092
+KAFKA_CLIENT_ID=incident-service
+KAFKA_GROUP_ID=incident-service-group
+KAFKAJS_NO_PARTITIONER_WARNING=1
 
 # Service URLs
 ALERT_SERVICE_URL=http://localhost:12402
@@ -365,8 +401,20 @@ USER_SERVICE_URL=http://localhost:12401
 ONCALL_SERVICE_URL=http://localhost:12405
 
 # API Gateway
-API_GATEWAY_URL=http://localhost:12400
-```
+API_GATEWAY_"admin@#55#"        # ⚠️ MUST be quoted!
+DB_DATABASE=notificationdb
+
+# Redis Configuration
+REDIS_HOST=100.113.63.36
+REDIS_PORT=6379
+REDIS_PASSWORD="redis@#55#6379#"  # ⚠️ MUST be quoted!
+
+# Kafka Configuration
+KAFKA_ENABLED=true
+KAFKA_BROKERS=100.113.63.36:9092
+KAFKA_CLIENT_ID=notification-service
+KAFKA_GROUP_ID=notification-service-group
+KAFKAJS_NO_PARTITIONER_WARNING=1
 
 ### Notification Service (.env)
 ```env
@@ -399,8 +447,20 @@ SLACK_WEBHOOK_URL=
 # SMS Configuration (Optional - Twilio)
 TWILIO_ACCOUNT_SID=
 TWILIO_AUTH_TOKEN=
-TWILIO_PHONE_NUMBER=
-```
+TWILIO_PHONE"admin@#55#"        # ⚠️ MUST be quoted!
+DB_DATABASE=oncalldb
+
+# Redis Configuration
+REDIS_HOST=100.113.63.36
+REDIS_PORT=6379
+REDIS_PASSWORD="redis@#55#6379#"  # ⚠️ MUST be quoted!
+
+# Kafka Configuration
+KAFKA_ENABLED=true
+KAFKA_BROKERS=100.113.63.36:9092
+KAFKA_CLIENT_ID=oncall-service
+KAFKA_GROUP_ID=oncall-service-group
+KAFKAJS_NO_PARTITIONER_WARNING=1
 
 ### OnCall Service (.env)
 ```env
@@ -408,8 +468,20 @@ TWILIO_PHONE_NUMBER=
 PORT=12405
 
 # Database Configuration (PostgreSQL on Tailscale)
-DB_HOST=100.113.63.36
-DB_PORT=5432
+DB_HOST=100."admin@#55#"        # ⚠️ MUST be quoted!
+DB_DATABASE=analyticsdb
+
+# Redis Configuration
+REDIS_HOST=100.113.63.36
+REDIS_PORT=6379
+REDIS_PASSWORD="redis@#55#6379#"  # ⚠️ MUST be quoted!
+
+# Kafka Configuration
+KAFKA_ENABLED=true
+KAFKA_BROKERS=100.113.63.36:9092
+KAFKA_CLIENT_ID=analytics-service
+KAFKA_GROUP_ID=analytics-service-group
+KAFKAJS_NO_PARTITIONER_WARNING=1
 DB_USERNAME=admin
 DB_PASSWORD=admin@#55#
 DB_DATABASE=oncalldb
@@ -474,85 +546,257 @@ Each microservice has its own dedicated PostgreSQL database on Tailscale network
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+
-- pnpm package manager
-- PostgreSQL database (on Tailscale: 100.113.63.36)
-- Docker (optional)
+- **Node.js** 18+ (Download from [nodejs.org](https://nodejs.org/))
+- **pnpm** package manager (Install: `npm install -g pnpm`)
+- **PostgreSQL** 16 database (on Tailscale: 100.113.63.36:5432)
+- **Redis** 7 (on Tailscale: 100.113.63.36:6379)
+- **Apache Kafka** 7.6.0 with Zookeeper (on Tailscale: 100.113.63.36:9092)
+- **Tailscale VPN** access for infrastructure services
+- **Git** for version control
+- **Docker** (optional, for containerized deployment)
+
+### Infrastructure Services
+
+This project requires three infrastructure services running on the Tailscale network (100.113.63.36):
+
+1. **PostgreSQL 16** (Port: 5432)
+   - Username: `admin`
+   - Password: `admin@#55#`
+   - Multiple databases: userdb, alertdb, incidentdb, notificationdb, oncalldb, analyticsdb
+
+2. **Redis 7** (Port: 6379)
+   - Password: `redis@#55#6379#`
+   - Used for caching and session management
+
+3. **Apache Kafka** (Port: 9092 external, 29092 internal)
+   - Used for event streaming between microservices
+   - Advertised listeners configured for both internal and external access
 
 ### Installation
 
-1. **Clone the repository**
+#### 1. **Clone the repository**
 ```bash
 git clone <repository-url>
 cd OpsGuardian
 ```
 
-2. **Install dependencies for all services**
+#### 2. **Install dependencies for all services**
 
-Backend services:
+**Important**: All backend services now require the `kafkajs` package. Install dependencies for each service:
+
 ```bash
-cd OpsGuardianAPI/api-gateway && pnpm install
-cd ../user-service && pnpm install
-cd ../alert-service && pnpm install
-cd ../incident-service && pnpm install
-cd ../notification-service && pnpm install
-cd ../oncall-service && pnpm install
-cd ../analytics-service && pnpm install
+# API Gateway (Port: 12400)
+cd OpsGuardianAPI/api-gateway
+pnpm install
+
+# User Service (Port: 12401)
+cd ../user-service
+pnpm install
+
+# Alert Service (Port: 12402)
+cd ../alert-service
+pnpm install
+
+# Incident Service (Port: 12403)
+cd ../incident-service
+pnpm install
+
+# Notification Service (Port: 12404)
+cd ../notification-service
+pnpm install
+
+# OnCall Service (Port: 12405)
+cd ../oncall-service
+pnpm install
+
+# Analytics Service (Port: 12406)
+cd ../analytics-service
+pnpm install
+
+# Frontend UI (Port: 3000)
+cd ../../OpsGuardianUI
+pnpm install
 ```
 
-Frontend:
-```bash
-cd ../../OpsGuardianUI && pnpm install
+#### 3. **Configure environment variables**
+
+**⚠️ CRITICAL: Special Characters in Passwords**
+
+The `.env` files contain passwords with special characters (like `#`). These **MUST** be wrapped in quotes, otherwise they will be truncated (the `#` character is treated as a comment in .env files).
+
+**Correct format:**
+```env
+DB_PASSWORD="admin@#55#"          # ✅ Correct - quoted
+REDIS_PASSWORD="redis@#55#6379#"  # ✅ Correct - quoted
 ```
 
-3. **Configure environment variables**
+**Wrong format:**
+```env
+DB_PASSWORD=admin@#55#            # ❌ Wrong - will be truncated to "admin@"
+REDIS_PASSWORD=redis@#55#6379#    # ❌ Wrong - will be truncated to "redis@"
+```
 
-Copy .env.example to .env for each service and configure accordingly (or use the .env files already created).
+Each service already has a `.env` file configured. Verify the following settings:
 
-4. **Start the services**
+**All backend services (user, alert, incident, notification, oncall, analytics) require:**
+```env
+# Database Configuration
+DB_HOST=100.113.63.36
+DB_PORT=5432
+DB_USERNAME=admin
+DB_PASSWORD="admin@#55#"          # Must be quoted!
+DB_DATABASE=<service-specific-db>
 
-Start each service in a separate terminal:
+# Redis Configuration
+REDIS_HOST=100.113.63.36
+REDIS_PORT=6379
+REDIS_PASSWORD="redis@#55#6379#"  # Must be quoted!
+
+# Kafka Configuration
+KAFKA_ENABLED=true
+KAFKA_BROKERS=100.113.63.36:9092
+KAFKA_CLIENT_ID=<service-name>
+KAFKA_GROUP_ID=<service-name>-group
+KAFKAJS_NO_PARTITIONER_WARNING=1
+```
+
+**API Gateway does NOT use Redis or Database** - only requires:
+```env
+PORT=12400
+USER_SERVICE_URL=http://localhost:12401
+ALERT_SERVICE_URL=http://localhost:12402
+INCIDENT_SERVICE_URL=http://localhost:12403
+NOTIFICATION_SERVICE_URL=http://localhost:12404
+ONCALL_SERVICE_URL=http://localhost:12405
+ANALYTICS_SERVICE_URL=http://localhost:12406
+CORS_ORIGIN=http://localhost:3000
+```
+
+#### 4. **Verify Infrastructure Services**
+
+Before starting the application, ensure all infrastructure services are running:
+
+```bash
+# Test PostgreSQL connection
+psql -h 100.113.63.36 -p 5432 -U admin -d userdb
+
+# Test Redis connection
+redis-cli -h 100.113.63.36 -p 6379 -a "redis@#55#6379#" ping
+
+# Test Kafka connection
+kafka-topics.sh --bootstrap-server 100.113.63.36:9092 --list
+```
+
+#### 5. **Start the services**
+
+**Option A: Start each service individually** (Recommended for development)
+
+Open 8 separate terminals and run:
+
+```bash
+# Terminal 1 - API Gateway
+cd OpsGuardianAPI/api-gateway
+pnpm run start:dev
+
+# Terminal 2 - User Service
+cd OpsGuardianAPI/user-service
+pnpm run start:dev
+
+# Terminal 3 - Alert Service
+cd OpsGuardianAPI/alert-service
+pnpm run start:dev
+
+# Terminal 4 - Incident Service
+cd OpsGuardianAPI/incident-service
+pnpm run start:dev
+
+# Terminal 5 - Notification Service
+cd OpsGuardianAPI/notification-service
+pnpm run start:dev
+
+# Terminal 6 - OnCall Service
+cd OpsGuardianAPI/oncall-service
+pnpm run start:dev
+
+# Terminal 7 - Analytics Service
+cd OpsGuardianAPI/analytics-service
+pnpm run start:dev
+
+# Terminal 8 - Frontend UI
+cd OpsGuardianUI
+pnpm run dev
+```
+
+**Option B: Use concurrently** (Start all at once)
+
+Create a root `package.json` with concurrently:
+```bash
+pnpm add -D concurrently
+pnpm run dev:all
+```
+
+#### 6. **Verify services are running**
+
+Check each service is running on its designated port:
 
 ```bash
 # API Gateway
-cd OpsGuardianAPI/api-gateway && pnpm run start:dev
+curl http://localhost:12400/api
 
 # User Service
-cd OpsGuardianAPI/user-service && pnpm run start:dev
+curl http://localhost:12401
 
 # Alert Service
-cd OpsGuardianAPI/alert-service && pnpm run start:dev
+curl http://localhost:12402
 
 # Incident Service
-cd OpsGuardianAPI/incident-service && pnpm run start:dev
+curl http://localhost:12403
 
 # Notification Service
-cd OpsGuardianAPI/notification-service && pnpm run start:dev
+curl http://localhost:12404
 
 # OnCall Service
-cd OpsGuardianAPI/oncall-service && pnpm run start:dev
+curl http://localhost:12405
 
 # Analytics Service
-cd OpsGuardianAPI/analytics-service && pnpm run start:dev
+curl http://localhost:12406
 
 # Frontend UI
-cd OpsGuardianUI && pnpm run dev
+# Open browser: http://localhost:3000
 ```
 
-5. **Access the application**
-- Frontend: http://localhost:3000
-- API Gateway: http://localhost:12400
-- Individual services: http://localhost:12401-12406
+#### 7. **Access the application**
+
+Once all services are running:
+- **Frontend**: http://localhost:3000
+- **API Gateway**: http://localhost:12400
+- **Individual Microservices**: http://localhost:12401-12406
 
 ## 🐳 Docker Deployment
 
 Each service includes a Dockerfile for containerization.
+ (Port: 12400)
+- **Database per Service**: Each service has its own PostgreSQL database
+- **Redis Integration**: Global caching layer for all services (except API Gateway)
+- **Kafka Event Streaming**: Inter-service communication via Apache Kafka
+- **Environment-based Configuration**: All services use .env files
+- **RESTful APIs**: Currently REST-based, GraphQL planned for future
+- **TypeScript**: Full type safety across all services
+- **Docker Ready**: All services are containerized
+- **Graceful Degradation**: Services continue running even if Kafka fails
 
-Build and run individual service:
-```bash
-cd OpsGuardianAPI/api-gateway
-docker build -t opsguardian-api-gateway .
-docker run -p 12400:12400 --env-file .env opsguardian-api-gateway
+### Key Architecture Components
+
+1. **API Gateway** - Request routing, no database/Redis dependency
+2. **User Service** - Authentication, authorization, JWT tokens
+3. **Alert Service** - Alert management, Kafka event producer
+4. **Incident Service** - Incident tracking, Kafka event consumer/producer
+5. **Notification Service** - Multi-channel notifications (Email, SMS, Slack)
+6. **OnCall Service** - Schedule management, escalation policies
+7. **Analytics Service** - Metrics aggregation, reporting
+8. **PostgreSQL** - Primary data store (separate DB per service)
+9. **Redis** - Caching layer, session management
+10. **Kafka** - Event streaming, inter-service messagingian-api-gateway
 ```
 
 ## 📡 API Endpoints
@@ -572,19 +816,29 @@ docker run -p 12400:12400 --env-file .env opsguardian-api-gateway
 
 - **Microservices**: Each service is independent and scalable
 - **API Gateway**: Single entry point with request routing
-- **Database per Service**: Each service has its own PostgreSQL database
-- **Environment-based Configuration**: All services use .env files
-- **RESTful APIs**: Currently REST-based, GraphQL planned for future
-- **TypeScript**: Full type safety across all services
-- **Docker Ready**: All services are containerized
+- **Database per Service**.0.1
+- **Language**: TypeScript 5
+- **Database**: PostgreSQL 16 + TypeORM 0.3.28
+- **Caching**: Redis 7 + ioredis 5.9.2
+- **Event Streaming**: Apache Kafka 7.6.0 + kafkajs 2.2.4
+- **Microservices**: @nestjs/microservices 11.1.12
+- **HTTP Client**: @nestjs/axios + axios
+- **Configuration**: @nestjs/config 4.0.2
+- **Validation**: class-validator
+- **Package Manager**: pnpm 10.24.0
 
-## 🔐 Security
+### Frontend
+- **Framework**: React 18
+- **Build Tool**: Vite
+- **Language**: TypeScript
+- **Styling**: CSS/TailwindCSS (to be configured)
 
-- JWT-based authentication in User Service
-- Environment variables for sensitive data
-- CORS configured on API Gateway
-- Database credentials on secure Tailscale network
-- Password hashing (to be implemented)
+### Infrastructure
+- **Container**: Docker
+- **Network**: Tailscale VPN (100.113.63.36)
+- **Message Broker**: Apache Kafka with Zookeeper
+- **Cache**: Redis 7
+- **Database**: PostgreSQL 16
 - Rate limiting (to be implemented)
 
 ## 🧪 Testing
@@ -636,12 +890,90 @@ Add your team members here
 
 ## 🔮 Future Enhancements
 
-- [ ] GraphQL API implementation
+- [ ] GraphQL API implementation in API Gateway
 - [ ] Kubernetes deployment configurations
-- [ ] CI/CD pipeline setup
-- [ ] Message queue integration (RabbitMQ/Kafka)
-- [ ] Caching layer (Redis)
-- [ ] API documentation (Swagger)
-- [ ] Monitoring and logging (ELK stack)
+- [ ] CI/CD pipeline setup (GitHub Actions/Jenkins)
+- [x] ~~Message queue integration (Kafka)~~ ✅ Completed
+- [x] ~~Caching layer (Redis)~~ ✅ Completed
+- [ ] API documentation (Swagger/OpenAPI)
+- [ ] Monitoring and logging (ELK stack/Prometheus)
 - [ ] Service mesh (Istio)
 - [ ] WebSocket support for real-time updates
+- [ ] Rate limiting and throttling
+- [ ] Circuit breaker pattern implementation
+- [ ] Distributed tracing (Jaeger)
+- [ ] Health checks and readiness probes
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+#### 1. **Redis Authentication Error**
+```
+Error: NOAUTH Authentication required
+```
+**Solution**: Ensure Redis password is quoted in .env file:
+```env
+REDIS_PASSWORD="redis@#55#6379#"  # Not: redis@#55#6379#
+```
+
+#### 2. **Database Connection Failed**
+```
+Error: password authentication failed for user "admin"
+```
+**Solution**: Ensure database password is quoted in .env file:
+```env
+DB_PASSWORD="admin@#55#"  # Not: admin@#55#
+```
+
+#### 3. **Kafka Package Missing**
+```
+Error: The "kafkajs" package is missing
+```
+**Solution**: Install dependencies in the service directory:
+```bash
+cd OpsGuardianAPI/<service-name>
+pnpm install
+```
+
+#### 4. **Kafka Connection Error**
+```
+Error: ECONNRESET or Connection timeout
+```
+**Solution**: 
+- Verify Kafka is running on 100.113.63.36:9092
+- Check Tailscale VPN connection
+- Kafka server needs 30-60 seconds to fully initialize after restart
+- Services will continue running with graceful degradation if Kafka fails
+
+#### 5. **Port Already in Use**
+```
+Error: listen EADDRINUSE: address already in use :::12401
+```
+**Solution**: 
+- Check if service is already running
+- Kill existing process: `lsof -ti:12401 | xargs kill -9` (Mac/Linux)
+- Or: `netstat -ano | findstr :12401` then `taskkill /PID <PID> /F` (Windows)
+
+#### 6. **TypeScript Compilation Errors**
+```
+Error: Cannot find module '@nestjs/config'
+```
+**Solution**: 
+- Ensure all dependencies are installed: `pnpm install`
+- Delete node_modules and reinstall: `rm -rf node_modules && pnpm install`
+
+### Network Access
+
+All infrastructure services require Tailscale VPN access (100.113.63.36):
+1. Install Tailscale from [tailscale.com](https://tailscale.com/)
+2. Connect to your Tailscale network
+3. Verify connectivity: `ping 100.113.63.36`
+
+### Debugging Tips
+
+1. **Check service logs**: Each service outputs detailed logs in watch mode
+2. **Verify environment variables**: Use `console.log(process.env.PORT)` to debug
+3. **Test connections individually**: Use curl/Postman to test each service
+4. **Check database**: Use psql or pgAdmin to verify database access
+5. **Monitor Kafka**: Use Kafka tools to check topics and consumer groups
