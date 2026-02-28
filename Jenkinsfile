@@ -9,8 +9,6 @@ pipeline {
     }
 
     environment {
-        API_DIR = 'OpsGuardianAPI'
-        UI_DIR  = 'OpsGuardianUI'
         DOCKERHUB_USER = 'nikhilmalviya80'
         K8S_NAMESPACE = 'opsguardian'
     }
@@ -22,6 +20,20 @@ pipeline {
                 deleteDir()
                 git branch: 'develop',
                     url: 'https://github.com/malviyanikhil123/OpsGuardian.git'
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    '''
+                }
             }
         }
 
@@ -77,4 +89,3 @@ def deployUI() {
         """
     }
 }
-
