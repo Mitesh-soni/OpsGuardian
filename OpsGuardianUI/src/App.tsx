@@ -1,11 +1,7 @@
-// import Navbar from "./Components/Navbar";
-// import Sidebar from "./Components/Sidebar";
-import Dashboard from "./Pages/Dashboard/Dashboard";
-// import Login from "./Pages/LoginPage/Login";
+import { AppProvider } from '@/app/providers/app-provider'
 
-function App() {
-	return <Dashboard />;
-    // return  <Sidebar/>;
+function App(): React.ReactElement {
+	return <AppProvider />
 }
 
-export default App;
+export default App
