@@ -12,6 +12,7 @@ import { KafkaModule } from './modules/kafka/kafka.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST || 'localhost',
@@ -19,13 +20,17 @@ import { KafkaModule } from './modules/kafka/kafka.module';
       username: process.env.DB_USERNAME || 'postgres',
       password: process.env.DB_PASSWORD || 'postgres',
       database: process.env.DB_DATABASE || 'userdb',
+
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
+      migrations: [__dirname + '/migrations/*{.ts,.js}'],
+
+      synchronize: false, // ✅ REQUIRED FOR MIGRATIONS
     }),
+
     RedisModule,
     KafkaModule.register(),
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
